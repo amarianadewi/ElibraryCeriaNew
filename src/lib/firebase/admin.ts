@@ -12,6 +12,14 @@ import path from "path";
 function cleanPrivateKey(key: string): string {
   let cleaned = key.trim();
 
+  // Strip wrapping single or double quotes if present
+  if (
+    (cleaned.startsWith('"') && cleaned.endsWith('"')) ||
+    (cleaned.startsWith("'") && cleaned.endsWith("'"))
+  ) {
+    cleaned = cleaned.slice(1, -1).trim();
+  }
+
   // If the key is base64-encoded (often starts with LS0tLS1CRUdJTi for -----BEGIN)
   if (
     cleaned.startsWith("LS0tLS1CRUdJTi") ||
@@ -27,7 +35,7 @@ function cleanPrivateKey(key: string): string {
     }
   }
 
-  // Strip wrapping single or double quotes if present
+  // Strip wrapping single or double quotes again if present
   if (
     (cleaned.startsWith('"') && cleaned.endsWith('"')) ||
     (cleaned.startsWith("'") && cleaned.endsWith("'"))
@@ -44,9 +52,18 @@ function cleanPrivateKey(key: string): string {
   return cleaned;
 }
 
+let adminAppInstance: App | null = null;
+let adminDbInstance: ReturnType<typeof getFirestore> | null = null;
+let adminAuthInstance: ReturnType<typeof getAuth> | null = null;
+let adminStorageInstance: ReturnType<typeof getStorage> | null = null;
+
 function getAdminApp(): App {
+  if (adminAppInstance) {
+    return adminAppInstance;
+  }
   if (getApps().length > 0) {
-    return getApp();
+    adminAppInstance = getApp();
+    return adminAppInstance;
   }
 
   const projectId = process.env.FIREBASE_PROJECT_ID || process.env.NEXT_PUBLIC_FIREBASE_PROJECT_ID || "elibrary-2ba9f";
@@ -57,15 +74,22 @@ function getAdminApp(): App {
   if (serviceAccountEnv) {
     try {
       let rawJson = serviceAccountEnv.trim();
+      if (
+        (rawJson.startsWith('"') && rawJson.endsWith('"')) ||
+        (rawJson.startsWith("'") && rawJson.endsWith("'"))
+      ) {
+        rawJson = rawJson.slice(1, -1).trim();
+      }
       if (!rawJson.startsWith("{") && !rawJson.endsWith("}")) {
         // Try base64 decoding
-        rawJson = Buffer.from(rawJson, "base64").toString("utf-8");
+        rawJson = Buffer.from(rawJson, "base64").toString("utf-8").trim();
       }
       const parsed = JSON.parse(rawJson);
-      return initializeApp({
+      adminAppInstance = initializeApp({
         credential: cert(parsed),
         storageBucket,
       });
+      return adminAppInstance;
     } catch (e: any) {
       console.error("Failed to parse FIREBASE_SERVICE_ACCOUNT environment variable:", e.message);
     }
@@ -78,7 +102,7 @@ function getAdminApp(): App {
   if (clientEmail && rawPrivateKey) {
     try {
       const privateKey = cleanPrivateKey(rawPrivateKey);
-      return initializeApp({
+      adminAppInstance = initializeApp({
         credential: cert({
           projectId,
           clientEmail,
@@ -86,6 +110,7 @@ function getAdminApp(): App {
         }),
         storageBucket,
       });
+      return adminAppInstance;
     } catch (e: any) {
       console.error("Failed to initialize Firebase Admin with environment keys:", e.message);
     }
@@ -97,10 +122,11 @@ function getAdminApp(): App {
     try {
       const raw = fs.readFileSync(serviceAccountPath, "utf-8");
       const parsed = JSON.parse(raw);
-      return initializeApp({
+      adminAppInstance = initializeApp({
         credential: cert(parsed),
         storageBucket,
       });
+      return adminAppInstance;
     } catch (e: any) {
       console.error("Failed to read local service-account.json:", e.message);
     }
@@ -108,16 +134,50 @@ function getAdminApp(): App {
 
   // 4. Fallback default
   console.warn("⚠️ Warning: Firebase Admin initialized without explicit credentials. In non-GCP hosts (like Vercel), set FIREBASE_CLIENT_EMAIL and FIREBASE_PRIVATE_KEY in Environment Variables.");
-  return initializeApp({
+  adminAppInstance = initializeApp({
     projectId,
     storageBucket,
   });
+  return adminAppInstance;
 }
 
-export const adminApp = getAdminApp();
-export const adminAuth = getAuth(adminApp);
-export const adminDb = getFirestore(adminApp);
-export const adminStorage = getStorage(adminApp);
+export const adminApp = new Proxy({} as App, {
+  get(_, prop) {
+    const target = getAdminApp();
+    const val = (target as any)[prop];
+    return typeof val === "function" ? val.bind(target) : val;
+  },
+});
+
+export const adminAuth = new Proxy({} as ReturnType<typeof getAuth>, {
+  get(_, prop) {
+    if (!adminAuthInstance) {
+      adminAuthInstance = getAuth(getAdminApp());
+    }
+    const val = (adminAuthInstance as any)[prop];
+    return typeof val === "function" ? val.bind(adminAuthInstance) : val;
+  },
+});
+
+export const adminDb = new Proxy({} as ReturnType<typeof getFirestore>, {
+  get(_, prop) {
+    if (!adminDbInstance) {
+      adminDbInstance = getFirestore(getAdminApp());
+    }
+    const val = (adminDbInstance as any)[prop];
+    return typeof val === "function" ? val.bind(adminDbInstance) : val;
+  },
+});
+
+export const adminStorage = new Proxy({} as ReturnType<typeof getStorage>, {
+  get(_, prop) {
+    if (!adminStorageInstance) {
+      adminStorageInstance = getStorage(getAdminApp());
+    }
+    const val = (adminStorageInstance as any)[prop];
+    return typeof val === "function" ? val.bind(adminStorageInstance) : val;
+  },
+});
 
 export function getFirebaseAdminStatus() {
   const hasServiceAccount = !!(process.env.FIREBASE_SERVICE_ACCOUNT || process.env.FIREBASE_SERVICE_ACCOUNT_KEY);
@@ -133,6 +193,24 @@ export function getFirebaseAdminStatus() {
     keyLength = cleaned.length;
   }
 
+  let serviceAccountValid = false;
+  const serviceAccountEnv = process.env.FIREBASE_SERVICE_ACCOUNT || process.env.FIREBASE_SERVICE_ACCOUNT_KEY;
+  if (serviceAccountEnv) {
+    try {
+      let raw = serviceAccountEnv.trim();
+      if ((raw.startsWith('"') && raw.endsWith('"')) || (raw.startsWith("'") && raw.endsWith("'"))) {
+        raw = raw.slice(1, -1).trim();
+      }
+      if (!raw.startsWith("{") && !raw.endsWith("}")) {
+        raw = Buffer.from(raw, "base64").toString("utf-8").trim();
+      }
+      const parsed = JSON.parse(raw);
+      serviceAccountValid = !!(parsed.project_id && parsed.client_email && parsed.private_key);
+    } catch {
+      serviceAccountValid = false;
+    }
+  }
+
   return {
     projectId: process.env.FIREBASE_PROJECT_ID || process.env.NEXT_PUBLIC_FIREBASE_PROJECT_ID || "elibrary-2ba9f",
     hasClientEmail: !!clientEmail,
@@ -141,7 +219,8 @@ export function getFirebaseAdminStatus() {
     isPrivateKeyValidFormat: keyValid,
     privateKeyLength: keyLength,
     hasServiceAccountJsonEnv: hasServiceAccount,
+    isServiceAccountValid: serviceAccountValid,
     hasLocalServiceAccountFile: hasLocalFile,
-    isConfigured: (!!clientEmail && keyValid) || hasServiceAccount || hasLocalFile,
+    isConfigured: (!!clientEmail && keyValid) || serviceAccountValid || hasLocalFile,
   };
 }

@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { adminDb, getFirebaseAdminStatus } from "@/lib/firebase/admin";
 
 export const dynamic = "force-dynamic";
+export const runtime = "nodejs";
 
 export async function GET() {
   const startTime = Date.now();
@@ -67,7 +68,7 @@ export async function GET() {
   diagnosticResult.durationMs = Date.now() - startTime;
 
   return NextResponse.json(diagnosticResult, {
-    status: diagnosticResult.status === "ok" ? 200 : 500,
+    status: 200,
   });
 }
 

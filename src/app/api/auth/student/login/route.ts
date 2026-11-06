@@ -4,6 +4,9 @@ import { adminDb } from "@/lib/firebase/admin";
 import { verifyPassword } from "@/lib/auth/password";
 import { createStudentToken } from "@/lib/auth/session";
 
+export const dynamic = "force-dynamic";
+export const runtime = "nodejs";
+
 export async function POST(req: Request) {
   try {
     const { nisn, password } = await req.json();
