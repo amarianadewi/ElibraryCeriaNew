@@ -70,9 +70,7 @@ function JurnalContent() {
   const [selectedBookId, setSelectedBookId] = useState(() => searchParams.get("bookId") || "");
   const [bookTitle, setBookTitle] = useState(() => searchParams.get("bookTitle") || "");
   const [coverUrl, setCoverUrl] = useState("");
-  const [readingDate, setReadingDate] = useState(() => new Date().toISOString().slice(0, 10));
-  const [durationMinutes, setDurationMinutes] = useState("15");
-  const [pagesRead, setPagesRead] = useState("10");
+  const readingDate = new Date().toISOString().slice(0, 10);
   const [feeling, setFeeling] = useState("😊 Sangat Seru");
   const [summary, setSummary] = useState("");
 
@@ -112,12 +110,6 @@ function JurnalContent() {
             setSelectedBookId(match.bookId);
             setBookTitle(match.bookTitle);
             setCoverUrl(match.coverUrl || "");
-            if (match.highestPage || match.lastPage) {
-              setPagesRead(String(match.highestPage || match.lastPage));
-            }
-            if (match.readingMinutes && match.readingMinutes > 0) {
-              setDurationMinutes(String(Math.max(5, match.readingMinutes)));
-            }
           } else if (qTitle) {
             // Dynamically include book coming directly from reading session
             const newEntry: ReadBookProgress = {
@@ -159,12 +151,6 @@ function JurnalContent() {
     if (matched) {
       setBookTitle(matched.bookTitle);
       setCoverUrl(matched.coverUrl || "");
-      if (matched.highestPage || matched.lastPage) {
-        setPagesRead(String(matched.highestPage || matched.lastPage));
-      }
-      if (matched.readingMinutes && matched.readingMinutes > 0) {
-        setDurationMinutes(String(Math.max(5, matched.readingMinutes)));
-      }
     }
   };
 
@@ -201,9 +187,9 @@ function JurnalContent() {
           bookId: selectedBookId,
           bookTitle,
           coverUrl,
-          readingDate,
-          durationMinutes: parseInt(durationMinutes) || 15,
-          pagesRead: parseInt(pagesRead) || 10,
+          readingDate: readingDate || new Date().toISOString().slice(0, 10),
+          durationMinutes: selectedBookData?.readingMinutes || 15,
+          pagesRead: selectedBookData?.highestPage || selectedBookData?.lastPage || 10,
           summary: summary.trim(),
           feeling,
         }),
@@ -347,9 +333,9 @@ function JurnalContent() {
 
               {/* Book Preview Card if Selected */}
               {selectedBookData && (
-                <div className="p-3.5 sm:p-4 rounded-2xl bg-orange-50/60 border border-orange-200 flex items-center justify-between gap-3 animate-in fade-in">
-                  <div className="flex items-center gap-3 min-w-0">
-                    <div className="relative w-12 aspect-[3/4] rounded-lg overflow-hidden shrink-0 border border-orange-200 shadow-xs bg-white">
+                <div className="p-4 rounded-2xl bg-orange-50/70 border border-orange-200 flex flex-col sm:flex-row sm:items-center justify-between gap-3 animate-in fade-in">
+                  <div className="flex items-center gap-3.5 min-w-0">
+                    <div className="relative w-12 sm:w-14 aspect-[3/4] rounded-xl overflow-hidden shrink-0 border border-orange-200 shadow-xs bg-white">
                       <Image
                         src={selectedBookData.coverUrl || "/logo.png"}
                         alt={selectedBookData.bookTitle}
@@ -357,28 +343,24 @@ function JurnalContent() {
                         className="object-cover"
                       />
                     </div>
-                    <div className="min-w-0">
+                    <div className="min-w-0 space-y-1">
                       <h4 className="text-xs sm:text-sm font-black text-slate-900 truncate">
                         {selectedBookData.bookTitle}
                       </h4>
-                      <div className="flex flex-wrap items-center gap-2 mt-0.5 text-[11px]">
-                        <span
-                          className={`font-bold px-2 py-0.5 rounded-full text-[10px] ${
-                            selectedBookData.status === "selesai"
-                              ? "bg-emerald-100 text-emerald-800"
-                              : "bg-sky-100 text-sky-800"
-                          }`}
-                        >
-                          {selectedBookData.status === "selesai" ? "Tamat Dibaca" : "Sedang Dibaca"}
+                      <div className="flex flex-wrap items-center gap-1.5 sm:gap-2 text-[11px] font-bold">
+                        <span className="flex items-center gap-1 text-slate-600 bg-white px-2 py-0.5 rounded-md border border-orange-100">
+                          <Calendar className="w-3 h-3 text-orange-500" />
+                          {formatDateIndo(readingDate)}
                         </span>
-                        <span className="text-slate-500 font-semibold">
-                          Hal. Terakhir: <strong>{selectedBookData.lastPage || 1}</strong>
+                        <span className="flex items-center gap-1 text-sky-700 bg-sky-50 px-2 py-0.5 rounded-md border border-sky-100">
+                          <Clock className="w-3 h-3 text-sky-500" />
+                          {selectedBookData.readingMinutes || 15} Menit (Otomatis)
                         </span>
-                        {selectedBookData.readingMinutes ? (
-                          <span className="text-slate-500 font-semibold">
-                            Total Waktu: <strong>{selectedBookData.readingMinutes} mnt</strong>
-                          </span>
-                        ) : null}
+                        <span className="flex items-center gap-1 text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded-md border border-emerald-100">
+                          <FileText className="w-3 h-3 text-emerald-500" />
+                          Hal. {selectedBookData.highestPage || selectedBookData.lastPage || 1} (
+                          {selectedBookData.status === "selesai" ? "Tamat" : "Sedang dibaca"})
+                        </span>
                       </div>
                     </div>
                   </div>
@@ -386,7 +368,7 @@ function JurnalContent() {
                   <Link
                     href={`/baca/${selectedBookData.bookId}`}
                     target="_blank"
-                    className="shrink-0 hidden xs:inline-flex items-center gap-1 px-3 py-1.5 rounded-xl bg-white hover:bg-orange-100 text-orange-700 border border-orange-200 font-bold text-xs transition-colors"
+                    className="shrink-0 inline-flex items-center gap-1 px-3 py-1.5 rounded-xl bg-white hover:bg-orange-100 text-orange-700 border border-orange-200 font-bold text-xs transition-colors self-start sm:self-center"
                   >
                     <span>Baca Lagi</span>
                     <ExternalLink className="w-3 h-3" />
@@ -394,59 +376,7 @@ function JurnalContent() {
                 </div>
               )}
 
-              {/* 2. Metadata Grid: Date, Duration, Pages */}
-              <div className="grid grid-cols-1 sm:grid-cols-3 gap-3.5">
-                <div>
-                  <label className="block text-xs font-black text-slate-700 mb-1">
-                    Tanggal Membaca
-                  </label>
-                  <div className="relative">
-                    <input
-                      type="date"
-                      required
-                      value={readingDate}
-                      onChange={(e) => setReadingDate(e.target.value)}
-                      className="w-full px-3.5 py-2.5 rounded-xl bg-slate-50 border-2 border-orange-100 text-xs sm:text-sm font-bold text-slate-800 focus:outline-none focus:border-orange-500"
-                    />
-                  </div>
-                </div>
-
-                <div>
-                  <label className="block text-xs font-black text-slate-700 mb-1">
-                    Waktu Membaca (Menit)
-                  </label>
-                  <div className="relative">
-                    <input
-                      type="number"
-                      min={1}
-                      max={360}
-                      required
-                      value={durationMinutes}
-                      onChange={(e) => setDurationMinutes(e.target.value)}
-                      className="w-full px-3.5 py-2.5 rounded-xl bg-slate-50 border-2 border-orange-100 text-xs sm:text-sm font-bold text-slate-800 focus:outline-none focus:border-orange-500"
-                    />
-                  </div>
-                </div>
-
-                <div>
-                  <label className="block text-xs font-black text-slate-700 mb-1">
-                    Halaman yang Dibaca
-                  </label>
-                  <div className="relative">
-                    <input
-                      type="number"
-                      min={1}
-                      max={500}
-                      required
-                      value={pagesRead}
-                      onChange={(e) => setPagesRead(e.target.value)}
-                      className="w-full px-3.5 py-2.5 rounded-xl bg-slate-50 border-2 border-orange-100 text-xs sm:text-sm font-bold text-slate-800 focus:outline-none focus:border-orange-500"
-                    />
-                  </div>
-                </div>
-              </div>
-
-              {/* 3. Feeling / Emotion Selector */}
+              {/* 2. Feeling / Emotion Selector (Quick 1-tap) */}
               <div className="space-y-1.5">
                 <label className="block text-xs font-black text-slate-700">
                   Bagaimana Perasaanmu Setelah Membaca Buku Ini?
@@ -469,19 +399,22 @@ function JurnalContent() {
                 </div>
               </div>
 
-              {/* 4. Summary & Lessons */}
-              <div className="space-y-1">
+              {/* 3. Summary & Lessons Learned (Mandatory) */}
+              <div className="space-y-1.5">
                 <label className="block text-xs font-black text-slate-700">
-                  Ringkasan Cerita atau Pesan Baik yang Kamu Dapatkan: <span className="text-red-500">*</span>
+                  Tuliskan Ringkasan Cerita atau Pesan Baik yang Kamu Dapatkan: <span className="text-red-500">*</span>
                 </label>
                 <textarea
                   required
                   rows={4}
                   value={summary}
                   onChange={(e) => setSummary(e.target.value)}
-                  placeholder="Contoh: Saya membaca tentang Kancil yang cerdik. Pesan baik yang saya dapatkan adalah kita harus menggunakan kepintaran untuk menolong sesama dan tidak boleh sombong..."
+                  placeholder="Ceritakan dengan kata-katamu sendiri apa yang terjadi di dalam buku dan pesan baik apa yang kamu pelajari..."
                   className="w-full p-4 rounded-2xl bg-slate-50 border-2 border-orange-100 text-xs sm:text-sm font-medium text-slate-800 focus:outline-none focus:border-orange-500 transition-colors leading-relaxed"
                 />
+                <p className="text-[11px] text-slate-400 font-medium">
+                  💡 Tanggal baca, menit membaca, dan jumlah halaman otomatis tersimpan dari rekor membaca akunmu.
+                </p>
               </div>
 
               {/* Submit Button */}

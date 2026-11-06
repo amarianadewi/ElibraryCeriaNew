@@ -54,12 +54,44 @@ export async function POST(req: Request) {
       feeling,
     } = await req.json();
 
-    if (!bookTitle || !readingDate || !summary) {
-      return NextResponse.json({ error: "Mohon lengkapi seluruh field jurnal." }, { status: 400 });
+    if (!bookTitle || !summary || !summary.trim()) {
+      return NextResponse.json({ error: "Mohon pilih buku dan tulis ringkasan jurnal." }, { status: 400 });
     }
 
-    // Attempt to lookup book cover if not provided
+    let finalDurationMinutes = parseInt(durationMinutes) || 0;
+    let finalPagesRead = parseInt(pagesRead) || 0;
+    let finalReadingDate = readingDate || new Date().toISOString().slice(0, 10);
     let finalCoverUrl = coverUrl || "";
+
+    // Automatically lookup minutes & pages read recorded in system from reading_progress
+    if (bookId) {
+      try {
+        const progressSnap = await adminDb
+          .collection("reading_progress")
+          .doc(`${session.studentId}_${bookId}`)
+          .get();
+
+        if (progressSnap.exists) {
+          const pData = progressSnap.data()!;
+          if (!finalDurationMinutes) {
+            finalDurationMinutes = pData.readingMinutes || Math.round((pData.readingSeconds || 0) / 60) || 15;
+          }
+          if (!finalPagesRead) {
+            finalPagesRead = pData.pagesReadCount || pData.highestPage || pData.lastPage || 10;
+          }
+          if (!finalCoverUrl) {
+            finalCoverUrl = pData.coverUrl || "";
+          }
+          if (!readingDate && pData.lastReadAt) {
+            finalReadingDate = pData.lastReadAt.slice(0, 10);
+          }
+        }
+      } catch (e) {
+        console.error("Lookup progress error:", e);
+      }
+    }
+
+    // Attempt to lookup book cover from books collection if still missing
     if (bookId && !finalCoverUrl) {
       try {
         const bookDoc = await adminDb.collection("books").doc(bookId).get();
@@ -71,6 +103,9 @@ export async function POST(req: Request) {
       }
     }
 
+    if (!finalDurationMinutes) finalDurationMinutes = 15;
+    if (!finalPagesRead) finalPagesRead = 10;
+
     const now = new Date().toISOString();
 
     const journalRef = await adminDb.collection("reading_journals").add({
@@ -78,9 +113,9 @@ export async function POST(req: Request) {
       bookId: bookId || "",
       bookTitle,
       coverUrl: finalCoverUrl,
-      readingDate,
-      durationMinutes: parseInt(durationMinutes) || 15,
-      pagesRead: parseInt(pagesRead) || 10,
+      readingDate: finalReadingDate,
+      durationMinutes: finalDurationMinutes,
+      pagesRead: finalPagesRead,
       summary: summary.trim(),
       feeling: feeling || "😊 Seru",
       createdAt: now,
