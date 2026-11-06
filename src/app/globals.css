@@ -1,0 +1,59 @@
+@import "tailwindcss";
+
+:root {
+  --background: #fffdf8;
+  --foreground: #0f172a;
+  --primary: #ff6b00;
+  --primary-hover: #ea580c;
+  --secondary: #0284c7;
+  --accent: #f59e0b;
+  --success: #10b981;
+  --card: #ffffff;
+  --card-border: #fed7aa;
+}
+
+body {
+  background-color: var(--background);
+  color: var(--foreground);
+  font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+  min-height: 100vh;
+}
+
+/* Custom rounded styling for kid-friendly theme */
+.card-ceria {
+  background: #ffffff;
+  border: 2px solid #fed7aa;
+  border-radius: 1.25rem;
+  box-shadow: 0 4px 12px rgba(255, 107, 0, 0.06);
+  transition: all 0.2s ease-in-out;
+}
+
+.card-ceria:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 24px rgba(255, 107, 0, 0.12);
+}
+
+.badge-ceria {
+  display: inline-flex;
+  align-items: center;
+  padding: 0.25rem 0.75rem;
+  border-radius: 9999px;
+  font-size: 0.75rem;
+  font-weight: 700;
+}
+
+/* Custom scrollbars */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+::-webkit-scrollbar-track {
+  background: #fff7ed;
+}
+::-webkit-scrollbar-thumb {
+  background: #fdba74;
+  border-radius: 9999px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: #fb923c;
+}

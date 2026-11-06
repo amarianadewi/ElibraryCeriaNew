@@ -1,0 +1,73 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    
+    // Helper functions
+    function isAuthenticated() {
+      return request.auth != null;
+    }
+    
+    function isAdmin() {
+      return isAuthenticated() && request.auth.token.email != null;
+    }
+
+    // Books collection - public read, admin write
+    match /books/{bookId} {
+      allow read: if true;
+      allow write: if isAdmin();
+    }
+
+    // Classes collection - public read, admin write
+    match /classes/{classId} {
+      allow read: if true;
+      allow write: if isAdmin();
+    }
+
+    // Badges collection - public read, admin write
+    match /badges/{badgeId} {
+      allow read: if true;
+      allow write: if isAdmin();
+    }
+
+    // Students collection - strict server access for passwords
+    match /students/{studentId} {
+      allow read: if isAdmin();
+      allow write: if isAdmin();
+    }
+
+    // Reading progress - student access
+    match /reading_progress/{progressId} {
+      allow read: if true;
+      allow write: if isAdmin();
+    }
+
+    // Reading journals
+    match /reading_journals/{journalId} {
+      allow read: if true;
+      allow write: if isAdmin();
+    }
+
+    // Point transactions - immutable ledger
+    match /point_transactions/{txId} {
+      allow read: if true;
+      allow write: if isAdmin();
+    }
+
+    // Student badges
+    match /student_badges/{id} {
+      allow read: if true;
+      allow write: if isAdmin();
+    }
+
+    // Book agent logs - admin only
+    match /book_agent_logs/{logId} {
+      allow read, write: if isAdmin();
+    }
+
+    // Default fallback
+    match /{document=**} {
+      allow read, write: if isAdmin();
+    }
+  }
+}
+
