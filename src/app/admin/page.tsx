@@ -45,12 +45,12 @@ export default function AdminDashboardPage() {
   };
 
   return (
-    <div className="space-y-6 max-w-7xl">
+    <div className="space-y-5 sm:space-y-6 max-w-7xl">
       {/* Title */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 sm:gap-4">
         <div>
-          <h1 className="text-2xl font-black text-slate-900 tracking-tight">
-            Dashboard Pemantauan Literasi
+          <h1 className="text-xl sm:text-2xl font-black text-slate-900 tracking-tight">
+            Dashboard Pemantauan Literasi 📊
           </h1>
           <p className="text-xs font-semibold text-slate-500">
             Monitoring aktivitas membaca, statistik siswa, dan koleksi buku SD Negeri Kaliwungu 05.
@@ -60,60 +60,60 @@ export default function AdminDashboardPage() {
         <div className="flex items-center gap-2">
           <Link
             href="/admin/siswa"
-            className="px-4 py-2 rounded-xl bg-orange-500 hover:bg-orange-600 text-white font-extrabold text-xs shadow-sm transition-all"
+            className="w-full sm:w-auto inline-flex items-center justify-center px-4 py-2.5 rounded-xl bg-orange-500 hover:bg-orange-600 active:bg-orange-700 text-white font-extrabold text-xs shadow-xs transition-all"
           >
             + Tambah Siswa
           </Link>
         </div>
       </div>
 
-      {/* Metrics Grid */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-        <div className="bg-white p-5 rounded-2xl border border-slate-200 shadow-xs flex items-center gap-4">
-          <div className="w-12 h-12 rounded-2xl bg-orange-100 text-orange-600 flex items-center justify-center shrink-0">
-            <Users className="w-6 h-6" />
+      {/* Metrics Grid (2 columns on mobile, 4 on desktop) */}
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
+        <div className="bg-white p-3.5 sm:p-5 rounded-2xl border border-slate-200 shadow-xs flex items-center gap-3 sm:gap-4">
+          <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-xl sm:rounded-2xl bg-orange-100 text-orange-600 flex items-center justify-center shrink-0">
+            <Users className="w-5 h-5 sm:w-6 sm:h-6" />
           </div>
-          <div>
-            <span className="block text-xs font-bold text-slate-500 uppercase tracking-wider">
+          <div className="min-w-0">
+            <span className="block text-[10px] sm:text-xs font-bold text-slate-500 uppercase tracking-wider truncate">
               Total Siswa
             </span>
-            <span className="text-2xl font-black text-slate-900">{summary.totalStudents}</span>
+            <span className="text-lg sm:text-2xl font-black text-slate-900">{summary.totalStudents}</span>
           </div>
         </div>
 
-        <div className="bg-white p-5 rounded-2xl border border-slate-200 shadow-xs flex items-center gap-4">
-          <div className="w-12 h-12 rounded-2xl bg-sky-100 text-sky-600 flex items-center justify-center shrink-0">
-            <BookOpen className="w-6 h-6" />
+        <div className="bg-white p-3.5 sm:p-5 rounded-2xl border border-slate-200 shadow-xs flex items-center gap-3 sm:gap-4">
+          <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-xl sm:rounded-2xl bg-sky-100 text-sky-600 flex items-center justify-center shrink-0">
+            <BookOpen className="w-5 h-5 sm:w-6 sm:h-6" />
           </div>
-          <div>
-            <span className="block text-xs font-bold text-slate-500 uppercase tracking-wider">
+          <div className="min-w-0">
+            <span className="block text-[10px] sm:text-xs font-bold text-slate-500 uppercase tracking-wider truncate">
               Koleksi Buku
             </span>
-            <span className="text-2xl font-black text-slate-900">{summary.totalBooks}</span>
+            <span className="text-lg sm:text-2xl font-black text-slate-900">{summary.totalBooks}</span>
           </div>
         </div>
 
-        <div className="bg-white p-5 rounded-2xl border border-slate-200 shadow-xs flex items-center gap-4">
-          <div className="w-12 h-12 rounded-2xl bg-emerald-100 text-emerald-600 flex items-center justify-center shrink-0">
-            <FileText className="w-6 h-6" />
+        <div className="bg-white p-3.5 sm:p-5 rounded-2xl border border-slate-200 shadow-xs flex items-center gap-3 sm:gap-4">
+          <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-xl sm:rounded-2xl bg-emerald-100 text-emerald-600 flex items-center justify-center shrink-0">
+            <FileText className="w-5 h-5 sm:w-6 sm:h-6" />
           </div>
-          <div>
-            <span className="block text-xs font-bold text-slate-500 uppercase tracking-wider">
-              Halaman Dibaca
+          <div className="min-w-0">
+            <span className="block text-[10px] sm:text-xs font-bold text-slate-500 uppercase tracking-wider truncate">
+              Hal. Dibaca
             </span>
-            <span className="text-2xl font-black text-slate-900">{summary.totalPagesRead}</span>
+            <span className="text-lg sm:text-2xl font-black text-slate-900">{summary.totalPagesRead}</span>
           </div>
         </div>
 
-        <div className="bg-white p-5 rounded-2xl border border-slate-200 shadow-xs flex items-center gap-4">
-          <div className="w-12 h-12 rounded-2xl bg-amber-100 text-amber-600 flex items-center justify-center shrink-0">
-            <Clock className="w-6 h-6" />
+        <div className="bg-white p-3.5 sm:p-5 rounded-2xl border border-slate-200 shadow-xs flex items-center gap-3 sm:gap-4">
+          <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-xl sm:rounded-2xl bg-amber-100 text-amber-600 flex items-center justify-center shrink-0">
+            <Clock className="w-5 h-5 sm:w-6 sm:h-6" />
           </div>
-          <div>
-            <span className="block text-xs font-bold text-slate-500 uppercase tracking-wider">
-              Total Waktu Baca
+          <div className="min-w-0">
+            <span className="block text-[10px] sm:text-xs font-bold text-slate-500 uppercase tracking-wider truncate">
+              Waktu Baca
             </span>
-            <span className="text-2xl font-black text-slate-900">
+            <span className="text-base sm:text-2xl font-black text-slate-900 truncate block">
               {formatMinutes(summary.totalReadingMinutes)}
             </span>
           </div>
@@ -121,65 +121,79 @@ export default function AdminDashboardPage() {
       </div>
 
       {/* Two Columns Section */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-6">
         {/* Top 5 Active Students */}
-        <div className="bg-white rounded-2xl border border-slate-200 p-5 shadow-xs space-y-4">
+        <div className="bg-white rounded-2xl border border-slate-200 p-4 sm:p-5 shadow-xs space-y-3 sm:space-y-4">
           <div className="flex items-center justify-between border-b border-slate-100 pb-3">
-            <h2 className="text-sm font-black text-slate-800 flex items-center gap-2">
-              <Trophy className="w-4 h-4 text-amber-500" />
-              Siswa Paling Aktif Membaca
+            <h2 className="text-xs sm:text-sm font-black text-slate-800 flex items-center gap-2">
+              <Trophy className="w-4 h-4 text-amber-500 shrink-0" />
+              <span>Siswa Paling Aktif</span>
             </h2>
             <Link
               href="/admin/siswa"
-              className="text-xs font-bold text-orange-600 hover:text-orange-700 flex items-center gap-1"
+              className="text-[11px] sm:text-xs font-bold text-orange-600 hover:text-orange-700 flex items-center gap-1"
             >
-              Semua Siswa <ArrowRight className="w-3.5 h-3.5" />
+              Semua <ArrowRight className="w-3.5 h-3.5" />
             </Link>
           </div>
 
           <div className="divide-y divide-slate-100">
-            {stats?.topStudents?.map((s: any, idx: number) => (
-              <div key={s.id} className="py-2.5 flex items-center justify-between">
-                <div className="flex items-center gap-3">
-                  <span className="w-6 h-6 rounded-lg bg-orange-100 text-orange-700 text-xs font-black flex items-center justify-center">
-                    {idx + 1}
-                  </span>
-                  <div>
-                    <h3 className="text-xs font-bold text-slate-800">{s.name}</h3>
-                    <span className="text-[10px] font-semibold text-slate-400">
-                      {s.classId} • {s.totalBooksCompleted} Buku
-                    </span>
-                  </div>
-                </div>
-                <span className="text-xs font-black text-amber-600">{s.totalPoints} ⭐</span>
+            {!stats?.topStudents?.length ? (
+              <div className="py-6 text-center text-xs font-semibold text-slate-400">
+                Belum ada data membaca siswa
               </div>
-            ))}
+            ) : (
+              stats.topStudents.map((s: any, idx: number) => (
+                <div key={s.id} className="py-2.5 flex items-center justify-between gap-2">
+                  <div className="flex items-center gap-2.5 sm:gap-3 min-w-0">
+                    <span className="w-6 h-6 rounded-lg bg-orange-100 text-orange-700 text-xs font-black flex items-center justify-center shrink-0">
+                      {idx + 1}
+                    </span>
+                    <div className="min-w-0">
+                      <h3 className="text-xs font-bold text-slate-800 truncate max-w-[140px] xs:max-w-[200px] sm:max-w-xs">
+                        {s.name}
+                      </h3>
+                      <span className="text-[10px] font-semibold text-slate-400 block truncate">
+                        {s.classId} • {s.totalBooksCompleted} Buku
+                      </span>
+                    </div>
+                  </div>
+                  <span className="text-xs font-black text-amber-600 shrink-0">{s.totalPoints} ⭐</span>
+                </div>
+              ))
+            )}
           </div>
         </div>
 
         {/* Recent Reading Activities */}
-        <div className="bg-white rounded-2xl border border-slate-200 p-5 shadow-xs space-y-4">
+        <div className="bg-white rounded-2xl border border-slate-200 p-4 sm:p-5 shadow-xs space-y-3 sm:space-y-4">
           <div className="flex items-center justify-between border-b border-slate-100 pb-3">
-            <h2 className="text-sm font-black text-slate-800 flex items-center gap-2">
-              <Activity className="w-4 h-4 text-emerald-500" />
-              Aktivitas Membaca Terkini
+            <h2 className="text-xs sm:text-sm font-black text-slate-800 flex items-center gap-2">
+              <Activity className="w-4 h-4 text-emerald-500 shrink-0" />
+              <span>Aktivitas Membaca Terkini</span>
             </h2>
           </div>
 
           <div className="divide-y divide-slate-100">
-            {stats?.recentActivities?.slice(0, 5).map((act: any) => (
-              <div key={act.id} className="py-2.5 flex items-center justify-between text-xs">
-                <div className="truncate max-w-[240px]">
-                  <h3 className="font-bold text-slate-800 truncate">{act.bookTitle}</h3>
-                  <span className="text-[10px] text-slate-400">
-                    Mencapai halaman {act.lastPage} ({act.status})
+            {!stats?.recentActivities?.length ? (
+              <div className="py-6 text-center text-xs font-semibold text-slate-400">
+                Belum ada aktivitas membaca terkini
+              </div>
+            ) : (
+              stats.recentActivities.slice(0, 5).map((act: any) => (
+                <div key={act.id} className="py-2.5 flex items-center justify-between gap-2 text-xs">
+                  <div className="truncate max-w-[160px] xs:max-w-[220px] sm:max-w-[260px]">
+                    <h3 className="font-bold text-slate-800 truncate">{act.bookTitle}</h3>
+                    <span className="text-[10px] text-slate-400 block truncate">
+                      Mencapai halaman {act.lastPage} ({act.status})
+                    </span>
+                  </div>
+                  <span className="text-[10px] font-medium text-slate-400 shrink-0">
+                    {formatDateIndo(act.updatedAt)}
                   </span>
                 </div>
-                <span className="text-[10px] font-medium text-slate-400 shrink-0">
-                  {formatDateIndo(act.updatedAt)}
-                </span>
-              </div>
-            ))}
+              ))
+            )}
           </div>
         </div>
       </div>

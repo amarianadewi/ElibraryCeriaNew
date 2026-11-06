@@ -200,7 +200,7 @@ export default function AdminSiswaPage() {
       {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
-          <h1 className="text-2xl font-black text-slate-900 tracking-tight">
+          <h1 className="text-xl sm:text-2xl font-black text-slate-900 tracking-tight">
             Manajemen Data Siswa 👥
           </h1>
           <p className="text-xs font-semibold text-slate-500">
@@ -208,27 +208,27 @@ export default function AdminSiswaPage() {
           </p>
         </div>
 
-        <div className="flex flex-wrap items-center gap-2">
+        <div className="flex flex-wrap sm:flex-nowrap items-center gap-2 w-full sm:w-auto">
           <button
             onClick={downloadTemplate}
-            className="px-3.5 py-2 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold text-xs flex items-center gap-1.5 transition-colors"
+            className="flex-1 sm:flex-initial px-3.5 py-2 rounded-xl bg-white hover:bg-slate-50 border border-slate-200 text-slate-700 font-bold text-xs flex items-center justify-center gap-1.5 shadow-xs transition-colors"
           >
-            <Download className="w-4 h-4" />
-            Template Excel
+            <Download className="w-4 h-4 shrink-0" />
+            <span>Template Excel</span>
           </button>
           <button
             onClick={() => setShowImportModal(true)}
-            className="px-3.5 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs flex items-center gap-1.5 shadow-xs transition-colors"
+            className="flex-1 sm:flex-initial px-3.5 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs flex items-center justify-center gap-1.5 shadow-xs transition-colors"
           >
-            <FileSpreadsheet className="w-4 h-4" />
-            Import Excel
+            <FileSpreadsheet className="w-4 h-4 shrink-0" />
+            <span>Import Excel</span>
           </button>
           <button
             onClick={() => setShowAddModal(true)}
-            className="px-3.5 py-2 rounded-xl bg-orange-500 hover:bg-orange-600 text-white font-extrabold text-xs flex items-center gap-1.5 shadow-xs transition-colors"
+            className="w-full sm:w-auto px-4 py-2 rounded-xl bg-orange-500 hover:bg-orange-600 text-white font-extrabold text-xs flex items-center justify-center gap-1.5 shadow-xs transition-colors"
           >
-            <Plus className="w-4 h-4" />
-            Tambah Siswa
+            <Plus className="w-4 h-4 shrink-0" />
+            <span>Tambah Siswa</span>
           </button>
         </div>
       </div>
@@ -263,6 +263,12 @@ export default function AdminSiswaPage() {
 
       {/* Student Table */}
       <div className="bg-white rounded-2xl border border-slate-200 overflow-hidden shadow-xs">
+        {/* Mobile horizontal scroll hint */}
+        <div className="md:hidden px-4 py-2 bg-amber-50/80 border-b border-amber-200/50 text-[11px] text-amber-900 font-semibold flex items-center gap-1.5">
+          <span>💡</span>
+          <span>Geser tabel ke samping untuk melihat bintang, status password & aksi</span>
+        </div>
+
         {loading ? (
           <div className="p-12 text-center text-xs font-bold text-slate-500">Memuat data siswa...</div>
         ) : filtered.length === 0 ? (
@@ -271,7 +277,7 @@ export default function AdminSiswaPage() {
           </div>
         ) : (
           <div className="overflow-x-auto">
-            <table className="w-full text-left text-xs">
+            <table className="w-full min-w-[720px] text-left text-xs">
               <thead className="bg-slate-50 border-b border-slate-200 text-slate-500 font-extrabold uppercase tracking-wider">
                 <tr>
                   <th className="py-3 px-4">NISN</th>
@@ -337,7 +343,7 @@ export default function AdminSiswaPage() {
       {/* Modal Add Student */}
       {showAddModal && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-xs">
-          <div className="bg-white rounded-3xl p-6 max-w-md w-full shadow-2xl border border-slate-200 space-y-4">
+          <div className="bg-white rounded-3xl p-5 sm:p-6 max-w-md w-full shadow-2xl border border-slate-200 space-y-4 max-h-[90vh] overflow-y-auto">
             <h3 className="text-lg font-black text-slate-900">Tambah Siswa Baru</h3>
 
             {addMsg && (
@@ -433,7 +439,7 @@ export default function AdminSiswaPage() {
       {/* Modal Import Excel */}
       {showImportModal && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-xs">
-          <div className="bg-white rounded-3xl p-6 max-w-lg w-full shadow-2xl border border-slate-200 space-y-4">
+          <div className="bg-white rounded-3xl p-5 sm:p-6 max-w-lg w-full shadow-2xl border border-slate-200 space-y-4 max-h-[90vh] overflow-y-auto">
             <div className="flex items-start justify-between">
               <div>
                 <h3 className="text-lg font-black text-slate-900 flex items-center gap-2">
@@ -559,7 +565,7 @@ export default function AdminSiswaPage() {
       {/* Modal Confirm Delete Student */}
       {deleteTarget && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-xs">
-          <div className="bg-white rounded-3xl p-6 max-w-sm w-full shadow-2xl border border-slate-200 space-y-4">
+          <div className="bg-white rounded-3xl p-5 sm:p-6 max-w-sm w-full shadow-2xl border border-slate-200 space-y-4 max-h-[90vh] overflow-y-auto">
             <div className="w-12 h-12 rounded-2xl bg-red-100 text-red-600 flex items-center justify-center mx-auto">
               <Trash2 className="w-6 h-6" />
             </div>

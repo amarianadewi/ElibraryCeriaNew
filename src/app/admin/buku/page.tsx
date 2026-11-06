@@ -181,6 +181,12 @@ export default function AdminBukuPage() {
 
       {/* Books Table */}
       <div className="bg-white rounded-2xl border border-slate-200 overflow-hidden shadow-xs">
+        {/* Mobile horizontal scroll hint */}
+        <div className="md:hidden px-4 py-2 bg-amber-50/80 border-b border-amber-200/50 text-[11px] text-amber-900 font-semibold flex items-center gap-1.5">
+          <span>💡</span>
+          <span>Geser tabel ke samping untuk melihat kategori, jenjang & tautan buku</span>
+        </div>
+
         {loading ? (
           <div className="p-16 text-center">
             <div className="w-10 h-10 border-4 border-orange-500 border-t-transparent rounded-full animate-spin mx-auto mb-3" />
@@ -193,7 +199,7 @@ export default function AdminBukuPage() {
           </div>
         ) : (
           <div className="overflow-x-auto">
-            <table className="w-full text-left text-xs">
+            <table className="w-full min-w-[700px] text-left text-xs">
               <thead className="bg-slate-50 border-b border-slate-200 text-slate-500 font-extrabold uppercase tracking-wider">
                 <tr>
                   <th className="py-3 px-4">No</th>
