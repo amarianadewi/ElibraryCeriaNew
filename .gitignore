@@ -43,6 +43,14 @@ yarn-error.log*
 .env*
 !.env.example
 
+# android
+android/.gradle/
+android/build/
+android/app/build/
+android/local.properties
+*.apk
+*.aab
+
 # vercel
 .vercel
 

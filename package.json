@@ -1,6 +1,6 @@
 {
   "name": "elibrary-ceria",
-  "version": "0.1.0",
+  "version": "1.0.1",
   "private": true,
   "engines": {
     "node": "22.x"
@@ -9,9 +9,16 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "lint": "eslint"
+    "lint": "eslint",
+    "bump:version": "node scripts/bump-version.mjs",
+    "cap:sync": "npx cap sync android",
+    "cap:open": "npx cap open android",
+    "build:apk": "node scripts/bump-version.mjs && npx cap sync android && cd android && gradlew.bat assembleDebug"
   },
   "dependencies": {
+    "@capacitor/android": "^8.6.0",
+    "@capacitor/cli": "^8.6.0",
+    "@capacitor/core": "^8.6.0",
     "@google/genai": "^2.32.0",
     "@tailwindcss/postcss": "^4.3.4",
     "archiver": "^8.0.0",
