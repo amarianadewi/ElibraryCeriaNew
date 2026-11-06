@@ -11,16 +11,23 @@ export async function GET(req: Request) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
+    // Query journals for this student without composite index dependency
     const snapshot = await adminDb
       .collection("reading_journals")
       .where("studentId", "==", session.studentId)
-      .orderBy("createdAt", "desc")
       .get();
 
     const journals = snapshot.docs.map((doc) => ({
       id: doc.id,
       ...doc.data(),
     }));
+
+    // In-memory sort newest first
+    journals.sort((a: any, b: any) => {
+      const timeA = new Date(a.createdAt || a.readingDate || 0).getTime();
+      const timeB = new Date(b.createdAt || b.readingDate || 0).getTime();
+      return timeB - timeA;
+    });
 
     return NextResponse.json({ journals });
   } catch (error) {
@@ -36,10 +43,32 @@ export async function POST(req: Request) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
-    const { bookId, bookTitle, readingDate, durationMinutes, pagesRead, summary } = await req.json();
+    const {
+      bookId,
+      bookTitle,
+      coverUrl,
+      readingDate,
+      durationMinutes,
+      pagesRead,
+      summary,
+      feeling,
+    } = await req.json();
 
     if (!bookTitle || !readingDate || !summary) {
       return NextResponse.json({ error: "Mohon lengkapi seluruh field jurnal." }, { status: 400 });
+    }
+
+    // Attempt to lookup book cover if not provided
+    let finalCoverUrl = coverUrl || "";
+    if (bookId && !finalCoverUrl) {
+      try {
+        const bookDoc = await adminDb.collection("books").doc(bookId).get();
+        if (bookDoc.exists) {
+          finalCoverUrl = bookDoc.data()?.coverUrl || "";
+        }
+      } catch (e) {
+        console.error("Lookup book cover error:", e);
+      }
     }
 
     const now = new Date().toISOString();
@@ -48,10 +77,12 @@ export async function POST(req: Request) {
       studentId: session.studentId,
       bookId: bookId || "",
       bookTitle,
+      coverUrl: finalCoverUrl,
       readingDate,
       durationMinutes: parseInt(durationMinutes) || 15,
       pagesRead: parseInt(pagesRead) || 10,
-      summary,
+      summary: summary.trim(),
+      feeling: feeling || "😊 Seru",
       createdAt: now,
     });
 

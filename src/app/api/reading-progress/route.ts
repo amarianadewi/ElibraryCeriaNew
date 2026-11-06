@@ -23,18 +23,23 @@ export async function GET(req: Request) {
       return NextResponse.json({ progress: { id: docSnap.id, ...docSnap.data() } });
     }
 
-    // Get all progresses for student
+    // Get all progresses for student without composite index requirement
     const snapshot = await adminDb
       .collection("reading_progress")
       .where("studentId", "==", session.studentId)
-      .orderBy("updatedAt", "desc")
-      .limit(10)
       .get();
 
     const progresses = snapshot.docs.map((doc) => ({
       id: doc.id,
       ...doc.data(),
     }));
+
+    // In-memory sort newest first
+    progresses.sort((a: any, b: any) => {
+      const timeA = new Date(a.updatedAt || a.lastReadAt || 0).getTime();
+      const timeB = new Date(b.updatedAt || b.lastReadAt || 0).getTime();
+      return timeB - timeA;
+    });
 
     return NextResponse.json({ progresses });
   } catch (error) {

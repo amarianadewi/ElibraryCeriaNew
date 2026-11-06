@@ -66,9 +66,21 @@ function ReaderContent({ id }: { id: string }) {
           setTotalPages(b.totalPages || 24);
 
           const qPage = searchParams.get("page");
+          const initPage = qPage ? parseInt(qPage) : 1;
           if (qPage) {
-            setCurrentPage(parseInt(qPage));
+            setCurrentPage(initPage);
           }
+
+          // Immediately log book into student's reading history
+          fetch("/api/reading-progress", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+              bookId: id,
+              currentPage: initPage,
+              durationSeconds: 0,
+            }),
+          }).catch(() => {});
         }
       } catch (e) {
         console.error(e);
