@@ -44,9 +44,7 @@ function PdfCanvasReaderComponent({
 
   // Stable callbacks in refs so they NEVER trigger re-fetching or reloading
   const onTotalPagesLoadedRef = useRef(onTotalPagesLoaded);
-  onTotalPagesLoadedRef.current = onTotalPagesLoaded;
   const onPageChangeRef = useRef(onPageChange);
-  onPageChangeRef.current = onPageChange;
 
   // Track loaded PDF URL so we NEVER reload the same document repeatedly
   const loadedPdfUrlRef = useRef<string>("");
@@ -56,7 +54,12 @@ function PdfCanvasReaderComponent({
   const pageCacheRef = useRef<Map<number, CachedPage>>(new Map());
   const activeRenderTasksRef = useRef<Map<number, any>>(new Map());
   const activeCanvasSlotRef = useRef<"A" | "B">("A");
-  activeCanvasSlotRef.current = activeCanvasSlot;
+
+  useEffect(() => {
+    onTotalPagesLoadedRef.current = onTotalPagesLoaded;
+    onPageChangeRef.current = onPageChange;
+    activeCanvasSlotRef.current = activeCanvasSlot;
+  });
 
   // 1. Load PDF Document (ONLY runs once per pdfUrl, never re-triggered on parent re-renders!)
   useEffect(() => {

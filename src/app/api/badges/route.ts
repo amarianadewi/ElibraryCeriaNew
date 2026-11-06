@@ -13,7 +13,7 @@ export async function GET() {
       ...doc.data(),
     })) as any[];
 
-    let unlockedMap: Record<string, string> = {};
+    const unlockedMap: Record<string, string> = {};
 
     if (session) {
       const studentBadgesSnap = await adminDb

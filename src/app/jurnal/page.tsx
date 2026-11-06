@@ -13,23 +13,14 @@ function JurnalContent() {
   const [loading, setLoading] = useState(true);
 
   // Form states
-  const [bookTitle, setBookTitle] = useState("");
-  const [bookId, setBookId] = useState("");
+  const [bookTitle, setBookTitle] = useState(() => searchParams.get("bookTitle") || "");
+  const [bookId, setBookId] = useState(() => searchParams.get("bookId") || "");
   const [readingDate, setReadingDate] = useState(new Date().toISOString().slice(0, 10));
   const [durationMinutes, setDurationMinutes] = useState("15");
   const [pagesRead, setPagesRead] = useState("10");
   const [summary, setSummary] = useState("");
   const [submitting, setSubmitting] = useState(false);
   const [alertMsg, setAlertMsg] = useState("");
-
-  useEffect(() => {
-    const qTitle = searchParams.get("bookTitle");
-    const qId = searchParams.get("bookId");
-    if (qTitle) setBookTitle(qTitle);
-    if (qId) setBookId(qId);
-
-    fetchJournals();
-  }, [searchParams]);
 
   const fetchJournals = async () => {
     try {
@@ -44,6 +35,10 @@ function JurnalContent() {
       setLoading(false);
     }
   };
+
+  useEffect(() => {
+    fetchJournals();
+  }, []);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();

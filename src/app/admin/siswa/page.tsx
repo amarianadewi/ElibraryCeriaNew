@@ -42,10 +42,6 @@ export default function AdminSiswaPage() {
   const [deleteTarget, setDeleteTarget] = useState<{ id: string; name: string; nisn: string } | null>(null);
   const [deleteLoading, setDeleteLoading] = useState(false);
 
-  useEffect(() => {
-    fetchStudents();
-  }, [selectedClass]);
-
   const fetchStudents = async () => {
     setLoading(true);
     try {
@@ -61,6 +57,10 @@ export default function AdminSiswaPage() {
       setLoading(false);
     }
   };
+
+  useEffect(() => {
+    fetchStudents();
+  }, [selectedClass]);
 
   const handleResetPassword = async (studentId: string, name: string) => {
     if (!confirm(`Reset password untuk siswa "${name}" ke bawaan 123456?`)) return;

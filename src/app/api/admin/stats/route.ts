@@ -11,8 +11,8 @@ export async function GET() {
       adminDb.collection("reading_progress").orderBy("updatedAt", "desc").limit(50).get(),
     ]);
 
-    let totalStudents = studentsSnap.size;
-    let totalBooks = booksSnap.size;
+    const totalStudents = studentsSnap.size;
+    const totalBooks = booksSnap.size;
     let totalPagesRead = 0;
     let totalReadingMinutes = 0;
 
