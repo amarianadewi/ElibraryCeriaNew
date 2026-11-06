@@ -5,6 +5,9 @@ on:
     branches: [ main ]
   workflow_dispatch:
 
+permissions:
+  contents: write
+
 jobs:
   build:
     name: Build APK
@@ -37,11 +40,27 @@ jobs:
       - name: Build Debug APK
         run: |
           cd android
-          ./gradlew assembleDebug
+          ./gradlew assembleDebug --stacktrace
+
+      - name: Rename APK
+        run: |
+          cp android/app/build/outputs/apk/debug/app-debug.apk android/app/build/outputs/apk/debug/elibrary-ceria.apk
 
       - name: Upload APK Artifact
         uses: actions/upload-artifact@v4
         with:
           name: elibrary-ceria-apk
-          path: android/app/build/outputs/apk/debug/app-debug.apk
+          path: android/app/build/outputs/apk/debug/elibrary-ceria.apk
           if-no-files-found: error
+
+      - name: Create/Update GitHub Release
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: apk-latest
+          name: "E-Library Ceria Android APK"
+          body: "APK Android resmi E-Library Ceria (SDN Kaliwungu 05). Dibuat otomatis via GitHub Actions CI/CD."
+          files: android/app/build/outputs/apk/debug/elibrary-ceria.apk
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+
