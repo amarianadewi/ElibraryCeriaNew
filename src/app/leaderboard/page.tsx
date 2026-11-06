@@ -8,36 +8,69 @@ import { formatMinutes } from "@/lib/utils";
 
 export default function LeaderboardPage() {
   const [leaderboard, setLeaderboard] = useState<any[]>([]);
+  const [classes, setClasses] = useState<{ id: string; name: string }[]>([]);
   const [currentStudent, setCurrentStudent] = useState<any>(null);
   const [tab, setTab] = useState<"global" | "class">("global");
+  const [selectedClass, setSelectedClass] = useState<string>("");
   const [loading, setLoading] = useState(true);
+  const [errorMsg, setErrorMsg] = useState("");
 
+  // 1. Fetch current student identity once
+  useEffect(() => {
+    async function fetchMe() {
+      try {
+        const studentRes = await fetch("/api/student/me");
+        if (studentRes.ok) {
+          const sData = await studentRes.json();
+          setCurrentStudent(sData);
+          if (sData?.classId && !selectedClass) {
+            setSelectedClass(sData.classId);
+          }
+        }
+      } catch (err) {
+        console.error("Failed to load student profile:", err);
+      }
+    }
+    fetchMe();
+  }, []);
+
+  // 2. Fetch leaderboard data whenever tab or selectedClass changes
   useEffect(() => {
     async function loadData() {
       setLoading(true);
+      setErrorMsg("");
       try {
-        const studentRes = await fetch("/api/student/me");
-        let sData = null;
-        if (studentRes.ok) {
-          sData = await studentRes.json();
-          setCurrentStudent(sData);
+        let query = "";
+        if (tab === "class") {
+          const cId = selectedClass || currentStudent?.classId || "kelas-1";
+          query = `?classId=${cId}`;
         }
 
-        const classParam = tab === "class" && sData?.classId ? `?classId=${sData.classId}` : "";
-        const lbRes = await fetch(`/api/leaderboard${classParam}`);
-        if (lbRes.ok) {
-          const lbData = await lbRes.json();
-          setLeaderboard(lbData.leaderboard || []);
+        const lbRes = await fetch(`/api/leaderboard${query}`);
+        if (!lbRes.ok) {
+          throw new Error("Gagal memuat papan peringkat.");
         }
-      } catch (e) {
-        console.error(e);
+
+        const lbData = await lbRes.json();
+        setLeaderboard(lbData.leaderboard || []);
+        if (Array.isArray(lbData.classes) && lbData.classes.length > 0) {
+          setClasses(lbData.classes);
+          if (!selectedClass && currentStudent?.classId) {
+            setSelectedClass(currentStudent.classId);
+          } else if (!selectedClass && lbData.classes[0]) {
+            setSelectedClass(lbData.classes[0].id);
+          }
+        }
+      } catch (e: any) {
+        console.error("Leaderboard fetch error:", e);
+        setErrorMsg(e?.message || "Terjadi kesalahan saat memuat peringkat.");
       } finally {
         setLoading(false);
       }
     }
 
     loadData();
-  }, [tab]);
+  }, [tab, selectedClass, currentStudent?.classId]);
 
   const top3 = leaderboard.slice(0, 3);
   const restList = leaderboard.slice(3);
@@ -70,7 +103,12 @@ export default function LeaderboardPage() {
             Peringkat Global
           </button>
           <button
-            onClick={() => setTab("class")}
+            onClick={() => {
+              setTab("class");
+              if (!selectedClass && currentStudent?.classId) {
+                setSelectedClass(currentStudent.classId);
+              }
+            }}
             className={`flex-1 py-2 rounded-xl text-xs sm:text-sm font-extrabold transition-all ${
               tab === "class"
                 ? "bg-white text-orange-600 shadow-sm"
@@ -81,8 +119,34 @@ export default function LeaderboardPage() {
           </button>
         </div>
 
+        {/* Class Filter Buttons when tab === 'class' */}
+        {tab === "class" && classes.length > 0 && (
+          <div className="flex items-center justify-center flex-wrap gap-2 pt-1">
+            {classes.map((c) => (
+              <button
+                key={c.id}
+                onClick={() => setSelectedClass(c.id)}
+                className={`px-3.5 py-1.5 rounded-xl text-xs font-bold transition-all ${
+                  selectedClass === c.id
+                    ? "bg-orange-500 text-white shadow-xs"
+                    : "bg-orange-50 text-slate-700 hover:bg-orange-100 border border-orange-200"
+                }`}
+              >
+                {c.name}
+              </button>
+            ))}
+          </div>
+        )}
+
+        {/* Error message alert */}
+        {errorMsg && (
+          <div className="p-4 bg-rose-50 border border-rose-200 rounded-2xl text-rose-700 text-xs sm:text-sm font-semibold text-center">
+            {errorMsg}
+          </div>
+        )}
+
         {/* Podium Top 3 */}
-        {top3.length > 0 && (
+        {!loading && top3.length > 0 && (
           <div className="grid grid-cols-3 gap-2 sm:gap-4 pt-6 items-end">
             {/* Rank 2 */}
             {top3[1] ? (
@@ -154,10 +218,12 @@ export default function LeaderboardPage() {
           </div>
 
           {loading ? (
-            <div className="p-12 text-center text-xs font-bold text-slate-500">Memuat peringkat...</div>
+            <div className="p-12 text-center text-xs font-bold text-slate-500 animate-pulse">
+              Memuat peringkat literasi...
+            </div>
           ) : leaderboard.length === 0 ? (
             <div className="p-12 text-center text-xs font-bold text-slate-500">
-              Belum ada data aktivitas membaca untuk ditampilkan.
+              Belum ada data aktivitas membaca untuk ditampilkan pada kelas ini.
             </div>
           ) : (
             <div className="divide-y divide-slate-100">
@@ -166,7 +232,7 @@ export default function LeaderboardPage() {
                 return (
                   <div
                     key={item.id}
-                    className={`p-3.5 sm:p-4 flex items-center justify-between gap-3 ${
+                    className={`p-3.5 sm:p-4 flex items-center justify-between gap-3 transition-colors ${
                       isMe ? "bg-orange-50/80 font-bold" : "hover:bg-slate-50"
                     }`}
                   >
@@ -221,4 +287,3 @@ export default function LeaderboardPage() {
     </div>
   );
 }
-
