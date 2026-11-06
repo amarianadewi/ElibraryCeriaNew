@@ -1,7 +1,5 @@
 import { initializeApp, cert, getApps, getApp, App } from "firebase-admin/app";
 import { getFirestore, Firestore } from "firebase-admin/firestore";
-import { getStorage, Storage } from "firebase-admin/storage";
-import { getAuth, Auth } from "firebase-admin/auth";
 import fs from "fs";
 import path from "path";
 
@@ -50,40 +48,66 @@ function getCredentials() {
   return null;
 }
 
-function initAdmin(): App {
+let _app: App | null = null;
+let _db: Firestore | null = null;
+
+export function getAdminApp(): App {
+  if (_app) return _app;
   if (getApps().length > 0) {
-    return getApp();
+    _app = getApp();
+    return _app;
   }
 
   const creds = getCredentials();
   const projectId = process.env.FIREBASE_PROJECT_ID || process.env.NEXT_PUBLIC_FIREBASE_PROJECT_ID || "elibrary-2ba9f";
-  const storageBucket = process.env.NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET || "elibrary-2ba9f.firebasestorage.app";
 
   if (creds) {
-    return initializeApp({
+    _app = initializeApp({
       credential: cert(creds),
-      storageBucket,
     });
+    return _app;
   }
 
   console.warn("⚠️ Warning: Firebase Admin initialized without credentials.");
-  return initializeApp({
+  _app = initializeApp({
     projectId,
-    storageBucket,
   });
+  return _app;
 }
 
-export const adminApp: App = initAdmin();
-export const adminDb: Firestore = getFirestore(adminApp);
-export const adminAuth: Auth = getAuth(adminApp);
-export const adminStorage: Storage = getStorage(adminApp);
+export function getAdminDb(): Firestore {
+  if (_db) return _db;
+  _db = getFirestore(getAdminApp());
+  return _db;
+}
+
+export const adminDb = new Proxy({} as Firestore, {
+  get(_, prop) {
+    if (prop === "then" || prop === Symbol.toStringTag || typeof prop === "symbol") {
+      return undefined;
+    }
+    const db = getAdminDb();
+    const val = (db as any)[prop];
+    return typeof val === "function" ? val.bind(db) : val;
+  },
+});
+
+export const adminApp = new Proxy({} as App, {
+  get(_, prop) {
+    if (prop === "then" || prop === Symbol.toStringTag || typeof prop === "symbol") {
+      return undefined;
+    }
+    const app = getAdminApp();
+    const val = (app as any)[prop];
+    return typeof val === "function" ? val.bind(app) : val;
+  },
+});
 
 export function getFirebaseAdminStatus() {
   const saEnv = process.env.FIREBASE_SERVICE_ACCOUNT || process.env.FIREBASE_SERVICE_ACCOUNT_KEY;
   const clientEmail = process.env.FIREBASE_CLIENT_EMAIL;
   const rawKey = process.env.FIREBASE_PRIVATE_KEY;
   const hasLocalFile = fs.existsSync(path.resolve(process.cwd(), "service-account.json"));
-
   const isPrivateKeyValidFormat = !!rawKey && rawKey.includes("BEGIN PRIVATE KEY") && rawKey.includes("END PRIVATE KEY");
 
   return {
