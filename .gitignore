@@ -22,9 +22,13 @@
 
 # misc
 .DS_Store
+Thumbs.db
 *.pem
+*.key
 *.local
 service-account*.json
+credentials*.json
+google-services*.json
 books-package/
 books-package*.zip
 temp/
